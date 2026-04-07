@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Rutinas Personalizadas</title>
+    <style>
+        /* Variables de color y fuentes para un diseño moderno */
+        :root {
+            --primary-color: #3b82f6; /* Azul moderno */
+            --primary-hover: #2563eb;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+            --warning-bg: #fffbeb;
+            --warning-text: #b45309;
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        /* Estilos de la tarjeta principal */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 1.8rem;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+        }
+
+        /* Estilos del formulario */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            background-color: #f9fafb;
+        }
+
+        input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background-color: #fff;
+        }
+
+        .row {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .row .form-group {
+            flex: 1;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        /* Estilos de la sección de resultados */
+        #results-section {
+            display: none; /* Oculto por defecto */
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .user-stats {
+            background-color: #f0fdf4; /* Verde muy claro */
+            border: 1px solid #bbf7d0;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .warning-box {
+            background-color: var(--warning-bg);
+            color: var(--warning-text);
+            padding: 15px;
+            border-left: 4px solid #f59e0b;
+            border-radius: 4px 8px 8px 4px;
+            margin-bottom: 25px;
+            font-size: 0.9rem;
+        }
+
+        .day-card {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .day-header {
+            background-color: #f9fafb;
+            padding: 12px 15px;
+            font-weight: bold;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--primary-color);
+        }
+
+        .day-content {
+            padding: 15px;
+            font-size: 0.95rem;
+        }
+
+        .rest-day {
+            background-color: #f3f4f6;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsividad básica */
+        @media (max-width: 480px) {
+            .row {
+                flex-direction: column;
+                gap: 0;
+            }
+            .card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Sección del Formulario -->
+        <div class="card" id="form-card">
+            <h1>Crea tu Rutina Ideal</h1>
+            <p class="subtitle">Ingresa tus datos para generar un plan de entrenamiento adaptado a tus necesidades y limitaciones físicas.</p>
+            
+            <form id="routine-form">
+                <div class="row">
+                    <div class="form-group">
+                        <label for="peso">Peso (kg)</label>
+                        <input type="number" id="peso" placeholder="Ej: 75" required min="30" max="250" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="estatura">Estatura (cm)</label>
+                        <input type="number" id="estatura" placeholder="Ej: 175" required min="100" max="250">
+                    </div>
+                    <div class="form-group">
+                        <label for="edad">Edad (años)</label>
+                        <input type="number" id="edad" placeholder="Ej: 30" required min="12" max="100">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="objetivo">Objetivo Principal</label>
+                    <select id="objetivo" required>
+                        <option value="" disabled selected>Selecciona una opción</option>
+                        <option value="perder_peso">Perder Peso / Definición</option>
+                        <option value="ganar_musculo">Ganar Masa Muscular</option>
+                        <option value="mantenimiento">Mantenimiento / Salud General</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="patologia">Condiciones Médicas / Lesiones</label>
+                    <select id="patologia" required>
+                        <option value="ninguna">Ninguna (Saludable)</option>
+                        <option value="articulaciones">Problemas Articulares (Rodillas, Caderas, Tobillos)</option>
+                        <option value="espalda">Dolor de Espalda / Hernias</option>
+                        <option value="hipertension">Hipertensión / Problemas Cardiovasculares</option>
+                    </select>
+                </div>
+
+                <button type="submit">Generar mi Rutina Semanal</button>
+            </form>
+        </div>
+
+        <!-- Sección de Resultados -->
+        <div class="card" id="results-section">
+            <h2 style="text-align: center; color: var(--primary-color); margin-bottom: 20px;">Tu Plan Personalizado</h2>
+            
+            <div class="user-stats" id="imc-display">
+                <!-- Se llenará con JS -->
+            </div>
+
+            <div id="warning-container">
+                <!-- Se llenará con advertencias médicas si aplican -->
+            </div>
+
+            <div id="routine-container">
+                <!-- Los días de la semana se generarán aquí -->
+            </div>
+
+            <button onclick="reiniciarApp()" style="background-color: var(--text-muted); margin-top: 20px;">Crear Nueva Rutina</button>
+        </div>
+    </div>
+
+    <script>
+        // Escuchar el evento de envío del formulario
+        document.getElementById('routine-form').addEventListener('submit', function(e) {
+            e.preventDefault(); // Evitar que la página se recargue
+
+            // Obtener los valores ingresados
+            const peso = parseFloat(document.getElementById('peso').value);
+            const estatura = parseFloat(document.getElementById('estatura').value);
+            const edad = parseInt(document.getElementById('edad').value);
+            const objetivo = document.getElementById('objetivo').value;
+            const patologia = document.getElementById('patologia').value;
+
+            // Calcular IMC (Índice de Masa Corporal)
+            const estaturaMetros = estatura / 100;
+            const imc = (peso / (estaturaMetros * estaturaMetros)).toFixed(1);
+            let estadoImc = "";
+
+            if (imc < 18.5) estadoImc = "Bajo peso";
+            else if (imc >= 18.5 && imc < 25) estadoImc = "Peso normal";
+            else if (imc >= 25 && imc < 30) estadoImc = "Sobrepeso";
+            else estadoImc = "Obesidad";
+
+            // Mostrar el IMC
+            document.getElementById('imc-display').innerHTML = `
+                <strong>Tu IMC:</strong> ${imc} (${estadoImc}) <br>
+                <small>Basado en ${peso}kg y ${estatura}cm.</small>
+            `;
+
+            // Generar la rutina basada en la lógica
+            generarRutina(edad, objetivo, patologia);
+
+            // Ocultar formulario y mostrar resultados
+            document.getElementById('form-card').style.display = 'none';
+            document.getElementById('results-section').style.display = 'block';
+        });
+
+        function generarRutina(edad, objetivo, patologia) {
+            let rutina = {};
+            let advertencia = "";
+
+            // 1. DEFINIR VARIABLES BASE SEGÚN PATOLOGÍA
+            let tipoCardio = "Trote suave, saltar la cuerda o correr";
+            let ejPiernas = "Sentadillas con peso, Zancadas (Lunges), Prensa";
+            let ejEspalda = "Peso muerto, Remo con barra, Dominadas";
+            let ejPecho = "Press de banca plano, Flexiones (Push-ups)";
+            let ejCore = "Crunches abdominales, Elevación de piernas colgando";
+
+            // Modificaciones por patología médica
+            if (patologia === 'articulaciones') {
+                advertencia = "<strong>Recomendación Médica:</strong> Tienes seleccionada una afección articular. Hemos eliminado ejercicios de alto impacto (saltos, trote duro) y modificado los ejercicios de fuerza para proteger tus rodillas y articulaciones.";
+                tipoCardio = "Bicicleta estática, Elíptica o Natación (Bajo impacto)";
+                ejPiernas = "Sentadillas isométricas en pared, Prensa (poco peso), Extensiones sentado";
+            } else if (patologia === 'espalda') {
+                advertencia = "<strong>Recomendación Médica:</strong> Para proteger tu espalda, hemos eliminado ejercicios que comprimen la columna (como el Peso Muerto pesado o Sentadilla con barra). Enfócate en la técnica estricta y en fortalecer el core.";
+                ejEspalda = "Remo en máquina (pecho apoyado), Jalón al pecho en polea";
+                ejPiernas = "Prensa de piernas, Curl femoral acostado";
+                ejCore = "Planchas (Planks), Bird-Dog, Puente de glúteos"; // Evitar crunches que flexionan la columna
+            } else if (patologia === 'hipertension') {
+                advertencia = "<strong>Recomendación Médica:</strong> Hipertensión detectada. <strong>Regla de oro:</strong> Nunca aguantes la respiración al hacer fuerza (Maniobra de Valsalva). Respira fluidamente. Evita levantar pesos máximos que requieran mucho esfuerzo de golpe.";
+                ejPiernas = "Sentadillas con peso corporal o mancuernas ligeras (altas repeticiones)";
+                ejPecho = "Flexiones de pecho o Press con mancuernas ligero";
+            }
+
+            // 2. DEFINIR VOLUMEN E INTENSIDAD SEGÚN EDAD Y OBJETIVO
+            let seriesReps = "";
+            let descanso = "";
+
+            if (objetivo === 'ganar_musculo') {
+                if (edad > 50) {
+                    seriesReps = "3 series de 10-12 repeticiones (Peso moderado, enfocado en el control)";
+                    descanso = "Descansa 90 segundos entre series.";
+                } else {
+                    seriesReps = "4 series de 8-10 repeticiones (Peso exigente, llegando casi al fallo)";
+                    descanso = "Descansa 2 minutos entre series.";
+                }
+            } else if (objetivo === 'perder_peso') {
+                seriesReps = "3-4 series de 15-20 repeticiones (Peso ligero/moderado, ritmo rápido)";
+                descanso = "Descansa 45-60 segundos entre series.";
+            } else { // Mantenimiento
+                seriesReps = "3 series de 12 repeticiones (Peso moderado)";
+                descanso = "Descansa 60-90 segundos entre series.";
+            }
+
+            // 3. CONSTRUIR LA SEMANA SEGÚN EL OBJETIVO PRINCIPAL
+            if (objetivo === 'ganar_musculo') {
+                rutina = {
+                    'Lunes': `<strong>Tren Superior (Pecho y Tríceps):</strong><br> - ${ejPecho}<br> - Aperturas con mancuernas<br> - Extensiones de tríceps en polea<br><br><em>${seriesReps}. ${descanso}</em>`,
+                    'Martes': `<strong>Tren Inferior (Piernas):</strong><br> - ${ejPiernas}<br> - Elevación de talones (Pantorrillas)<br><br><em>${seriesReps}. ${descanso}</em>`,
+                    'Miércoles': `<strong>Descanso Activo:</strong><br> Caminata ligera de 30 min o estiramientos profundos / Yoga.`,
+                    'Jueves': `<strong>Espalda y Bíceps:</strong><br> - ${ejEspalda}<br> - Curl de bíceps con mancuernas o barra<br><br><em>${seriesReps}. ${descanso}</em>`,
+                    'Viernes': `<strong>Hombros y Core:</strong><br> - Press militar (sentado si hay dolor de espalda)<br> - Elevaciones laterales<br> - ${ejCore} (3 series al fallo)`,
+                    'Sábado': `<strong>Cardio Suave (Recuperación):</strong><br> 20-30 min de ${tipoCardio}.`,
+                    'Domingo': `<strong>Descanso Total.</strong> Recuperación muscular crucial.`
+                };
+            } else if (objetivo === 'perder_peso') {
+                rutina = {
+                    'Lunes': `<strong>Cardio + Core:</strong><br> - 40 min de ${tipoCardio}<br> - Circuito: ${ejCore} (4 series sin descanso)`,
+                    'Martes': `<strong>Circuito Cuerpo Completo (Quema grasa):</strong><br> - ${ejPiernas}<br> - ${ejPecho}<br> - ${ejEspalda} ligero<br><br><em>Realizar como circuito continuo. ${seriesReps}.</em>`,
+                    'Miércoles': `<strong>Cardio Interválico (HIIT):</strong><br> - 30 min de ${tipoCardio} alternando 1 min rápido / 1 min suave.`,
+                    'Jueves': `<strong>Descanso Activo:</strong><br> Estiramientos, Yoga o caminata recreativa.`,
+                    'Viernes': `<strong>Circuito Cuerpo Completo:</strong><br> Igual al Martes, buscando mejorar los tiempos o subir ligeramente el peso.`,
+                    'Sábado': `<strong>Cardio Largo Constante:</strong><br> 45-60 min de ${tipoCardio} a ritmo conversacional.`,
+                    'Domingo': `<strong>Descanso Total.</strong>`
+                };
+            } else { // Mantenimiento
+                 rutina = {
+                    'Lunes': `<strong>Cuerpo Completo A:</strong><br> - ${ejPiernas}<br> - ${ejPecho}<br> - ${ejCore}<br><br><em>${seriesReps}. ${descanso}</em>`,
+                    'Martes': `<strong>Cardio Saludable:</strong><br> 30-40 min de ${tipoCardio}.`,
+                    'Miércoles': `<strong>Cuerpo Completo B:</strong><br> - Prensa o variación de pierna<br> - ${ejEspalda}<br> - Press de hombros ligero<br><br><em>${seriesReps}. ${descanso}</em>`,
+                    'Jueves': `<strong>Descanso o Movilidad.</strong>`,
+                    'Viernes': `<strong>Entrenamiento Funcional:</strong><br> Ejercicios con peso corporal, bandas elásticas o TRX.`,
+                    'Sábado': `<strong>Actividad Recreativa:</strong><br> Ciclismo al aire libre, natación, deporte en equipo, baile.`,
+                    'Domingo': `<strong>Descanso Total.</strong>`
+                };
+            }
+
+            // Ajuste extra por edad avanzada (Más descanso)
+            if (edad > 60) {
+                rutina['Miércoles'] = `<strong>Descanso Total.</strong> Recuperación necesaria por edad.`;
+                rutina['Sábado'] = `<strong>Caminata suave y estiramientos.</strong>`;
+            }
+
+            // 4. RENDERIZAR EN EL HTML
+            const warningContainer = document.getElementById('warning-container');
+            if (advertencia !== "") {
+                warningContainer.innerHTML = `<div class="warning-box">${advertencia}</div>`;
+            } else {
+                warningContainer.innerHTML = "";
+            }
+
+            const routineContainer = document.getElementById('routine-container');
+            routineContainer.innerHTML = ""; // Limpiar rutinas anteriores
+
+            for (const [dia, descripcion] of Object.entries(rutina)) {
+                // Determinar si es un día de descanso para darle un estilo diferente
+                const esDescanso = descripcion.includes('Descanso');
+                const contentClass = esDescanso ? 'day-content rest-day' : 'day-content';
+
+                const dayHTML = `
+                    <div class="day-card">
+                        <div class="day-header">${dia}</div>
+                        <div class="${contentClass}">${descripcion}</div>
+                    </div>
+                `;
+                routineContainer.innerHTML += dayHTML;
+            }
+        }
+
+        // Función para volver al formulario
+        function reiniciarApp() {
+            document.getElementById('results-section').style.display = 'none';
+            document.getElementById('form-card').style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+    </script>
+</body>
+</html>
